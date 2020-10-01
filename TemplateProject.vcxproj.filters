@@ -72,6 +72,7 @@
     <ClInclude Include="NaveEspacial.h" />
     <ClInclude Include="Arbolito.h" />
     <ClInclude Include="glm\glm.h" />
+    <ClInclude Include="Model.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glew\source\glew.c">
@@ -159,6 +160,7 @@
     <ClCompile Include="NaveEspacial.cpp" />
     <ClCompile Include="Arbolito.cpp" />
     <ClCompile Include="glm\glm.cpp" />
+    <ClCompile Include="Model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="freeglut\source\freeglutdll.def">

@@ -104,6 +104,7 @@
     <ClInclude Include="glew\include\Gl\glxew.h" />
     <ClInclude Include="glew\include\Gl\wglew.h" />
     <ClInclude Include="glm\glm.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="NaveEspacial.h" />
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +139,7 @@
     <ClCompile Include="glm\glm.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NaveEspacial.cpp" />
+    <ClCompile Include="Model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="freeglut\source\freeglutdll.def" />

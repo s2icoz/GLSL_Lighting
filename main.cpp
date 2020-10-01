@@ -10,11 +10,11 @@
 #include "glsl.h"
 #include <time.h>
 
-#include "Arbolito.h"
-#include "NaveEspacial.h"
 #define NUM_NAVES 1
 
 #include "glm/glm.h"
+
+#include "Model.h"
 
 //-----------------------------------------------------------------------------
 
@@ -29,10 +29,14 @@ protected:
    float timer010;  // timer counting 0->1->0
    bool bUp;        // flag if counting up or down.
 
-   NaveEspacial neMisNaves[NUM_NAVES];
-   Arbolito aMisArbolitos[2];
-
-   GLMmodel* objmodel_ptr;
+   Model* objs[5];
+   /*
+   objs[0] = astronauta
+       [1] = casco
+       [2] = cohete
+       [3] = grua //Dibujado anteriormente
+       [4] = arbol
+   */
 
 public:
 	myWindow(){}
@@ -46,73 +50,25 @@ public:
       //timer010 = 0.09; //for screenshot!
       glPushMatrix();
       if (shader) shader->begin();
-      glPushMatrix();
-        glmDraw(objmodel_ptr, GLM_SMOOTH | GLM_MATERIAL);
-      glPopMatrix();
-      /*glPushMatrix();
-      
-      glTranslatef(0.0, -4, 0.0);
 
-      //Cabeza de la serpiente
       glPushMatrix();
-        glTranslatef(-3.0, 0.0, 0.0);
-        glutWireCylinder(1.8, 0.1, 20, 20);
-        glPushMatrix();
-            glTranslatef(-0.4, 0.0, 0.0);
-            glTranslatef(0.0, 0.8, 0.0);
-            glutWireCylinder(0.5, 0.1, 20, 20);
-            glTranslatef(0.0, -1.6, 0.0);
-            glutWireCylinder(0.5, 0.1, 20, 20);
-        glPopMatrix();
-        glTranslatef(-1.8, 0.0, 0.0);
-        glPushMatrix();
-            glRotatef(90, 0.0, -1.0, 0.0);
-            glutSolidCylinder(0.13, 1.6, 3, 3);
-        glPopMatrix();
-        glTranslatef(-1.6, 0.0, 0.0);
-        glPushMatrix();
-            glRotatef(90, 0.0, -1.0, 0.5);
-            glutSolidCylinder(0.08, 0.75, 3, 3);
-        glPopMatrix();
-        glPushMatrix();
-            glTranslatef(0.0, 0.1, 0.0);
-            glRotatef(90, 0.0, -1.0, -0.5);
-            glutSolidCylinder(0.08, 0.75, 3, 3);
-        glPopMatrix();
+        glTranslatef(0, -1, 0);
+        glScalef(0.6, 0.6, 0.6);
+        objs[0]->draw();
       glPopMatrix();
 
-      // Cola de la serpiente
-      glTranslatef(-0.5*razon, 0.0, 0.0);
-      glRotatef((GLfloat)ang, 0.0, 0.0, 1.0);
-      glTranslatef(0.5*razon, 0.0, 0.0);
       glPushMatrix();
-          glScalef(0.8*razon, 0.8*razon, 0.3*razon);
-          glutWireCube(1.0);
+        glTranslatef(0, 10.3, -10);
+        glScalef(30, 30, 30);
+        objs[2]->draw();
       glPopMatrix();
 
-      glTranslatef(1 * razon, 0.0, 0.0);
+      glPushMatrix();
+          glTranslatef(3, 0, -5);
+          objs[4]->draw();
+      glPopMatrix();
 
-      for (int i = 0; i < segmentos; i++) {
-          glTranslatef(-0.5 * razon, 0.0, 0.0);
-          glRotatef((GLfloat)ang, 0.0, 0.0, 1.0);
-          glTranslatef(0.5 * razon, 0.0, 0.0);
-          glPushMatrix();
-              glScalef(0.8 * razon, 0.8 * razon, 0.3 * razon);
-              glutWireCube(1.0);
-          glPopMatrix();
 
-          glTranslatef(1 * razon, 0.0, 0.0);
-
-          ang *= 1.1;
-          razon *= 0.9;
-      }*/
-
-      /*
-      ciclo:
-        renderizacion
-        angulo *0.9
-        tamaño -0.1
-      */
       if (shader) shader->end();
       glutSwapBuffers();
       glPopMatrix();
@@ -131,20 +87,10 @@ public:
 		glShadeModel(GL_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 
-        objmodel_ptr = NULL;
         //***Abrir malla
-        if (!objmodel_ptr)
-        {
-            objmodel_ptr = glmReadOBJ("./glm/models/bunny.obj");
-            if (!objmodel_ptr)
-                exit(0);
-
-            glmUnitize(objmodel_ptr);
-            glmFacetNormals(objmodel_ptr);
-            glmVertexNormals(objmodel_ptr, 90.0);
-        }
-
-        neMisNaves[0] = *(new NaveEspacial);
+        objs[0] = new Model("./glm/models/astronaut/astronaut.obj");
+        objs[2] = new Model("./glm/models/rocket/rocket.obj");         
+        objs[4] = new Model("./glm/models/tree/tree.obj");
 
 		shader = SM.loadfromFile("vertexshader.txt","fragmentshader.txt"); // load (and compile, link) from file
 		if (shader==0) 
@@ -175,7 +121,7 @@ public:
       gluPerspective(120,ratio,1,100);
 	   glMatrixMode(GL_MODELVIEW);
 	   glLoadIdentity();
-	   gluLookAt(0.0f,0.0f,4.0f, 
+	   gluLookAt(1.0f,0.0f,4.0f, 
 		          0.0,0.0,-1.0,
 			       0.0f,1.0f,0.0f);
    }
