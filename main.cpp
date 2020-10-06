@@ -52,20 +52,35 @@ public:
       if (shader) shader->begin();
 
       glPushMatrix();
-        glTranslatef(0, -1, 0);
+        glTranslatef(0, -1, 3);
+        glRotatef(180,0,1,0);
         glScalef(0.6, 0.6, 0.6);
         objs[0]->draw();
       glPopMatrix();
 
+
       glPushMatrix();
-        glTranslatef(0, 10.3, -10);
-        glScalef(30, 30, 30);
+      glTranslatef(1.5, -1.5, 3);
+      //glRotatef(180, 0, 1, 0);
+      glScalef(1, 1,1);
+      objs[1]->draw();
+      glPopMatrix();
+
+      glPushMatrix();
+        glTranslatef(3, 5, -3);
+        glScalef(7, 7, 7);
         objs[2]->draw();
       glPopMatrix();
 
       glPushMatrix();
-          glTranslatef(3, 0, -5);
+          glTranslatef(-5, 0, -1);
           objs[4]->draw();
+      glPopMatrix();
+
+      glPushMatrix();
+      glTranslatef(0, 5, -3);
+      glScalef(7, 7, 7);
+      objs[3]->draw();
       glPopMatrix();
 
 
@@ -89,18 +104,17 @@ public:
 
         //***Abrir malla
         objs[0] = new Model("./glm/models/astronaut/astronaut.obj");
-	objs[1] = new Model("./glm/models/helmet.obj");
-        objs[2] = new Model("./glm/models/rocket/rocket.obj");         
+        objs[2] = new Model("./glm/models/rocket/rocket1.obj");
+        objs[3] = new Model("./glm/models/grua/grua.obj");
         objs[4] = new Model("./glm/models/tree/tree.obj");
+        objs[1] = new Model("./glm/models/casco/casco.obj");
 
 		shader = SM.loadfromFile("vertexshader.txt","fragmentshader.txt"); // load (and compile, link) from file
 		if (shader==0) 
          std::cout << "Error Loading, compiling or linking shader\n";
       else
       {
-         
-	 
-	Object = shader->GetProgramObject();
+         ProgramObject = shader->GetProgramObject();
       }
 
       time0 = clock();
