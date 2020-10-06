@@ -89,6 +89,7 @@ public:
 
         //***Abrir malla
         objs[0] = new Model("./glm/models/astronaut/astronaut.obj");
+	objs[1] = new Model("./glm/models/helmet.obj");
         objs[2] = new Model("./glm/models/rocket/rocket.obj");         
         objs[4] = new Model("./glm/models/tree/tree.obj");
 
@@ -97,7 +98,9 @@ public:
          std::cout << "Error Loading, compiling or linking shader\n";
       else
       {
-         ProgramObject = shader->GetProgramObject();
+         
+	 
+	Object = shader->GetProgramObject();
       }
 
       time0 = clock();
