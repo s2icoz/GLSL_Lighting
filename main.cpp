@@ -9,10 +9,8 @@
 #include <iostream>
 #include "glsl.h"
 #include <time.h>
-
-#define NUM_NAVES 1
-
-#include "glm/glm.h"
+#include "glm.h"
+#include <FreeImage.h> //*** Para Textura: Incluir librería
 
 #include "Model.h"
 
@@ -22,71 +20,163 @@
 class myWindow : public cwc::glutWindow
 {
 protected:
-   cwc::glShaderManager SM;
-   cwc::glShader *shader;
-   GLuint ProgramObject;
-   clock_t time0,time1;
-   float timer010;  // timer counting 0->1->0
-   bool bUp;        // flag if counting up or down.
+    cwc::glShaderManager SM;
+    cwc::glShader* shader;
+    cwc::glShader* shader1; //Para Textura: variable para abrir los shader de textura
+    GLuint ProgramObject;
+    clock_t time0, time1;
+    float timer010;  // timer counting 0->1->0
+    bool bUp;        // flag if counting up or down.
+    GLMmodel* objmodel_ptr1; //*** Para Textura: variable para objeto texturizado
+    GLuint texid; //*** Para Textura: variable que almacena el identificador de textura
 
-   Model* objs[5];
-   /*
-   objs[0] = astronauta
-       [1] = casco
-       [2] = cohete
-       [3] = grua //Dibujado anteriormente
-       [4] = arbol
-   */
+    Model* objs[5];     /* Objetos en posiciones del arreglo
+                        [0] = astronauta
+                        [1] = casco
+                        [2] = cohete
+                        [3] = grua //Dibujado anteriormente
+                        [4] = arbol*/
+
+    float vMovCam;      // Velocida de movimiento de la camara
+    float posCam[3];    /*Valores de ejes en el posCam[]
+                        [0] -> X
+                        [1] -> Y
+                        [2] -> Z*/
+
+    bool movCam[6];     /*Valores de lados de ejes en el movCam[]
+                        [0] -> X izquierda
+                        [1] -> X derecha
+                        [2] -> Y arriba
+                        [3] -> Y abajo
+                        [4] -> Z adentro
+                        [5] -> Z afuera*/
 
 public:
 	myWindow(){}
 
+    //*** Para movimiento de camara: aqui adiciono un movimientos para cada tecla
+    void moverCamara() {
+        //*** Para camara: Movimiento X
+        if (movCam[0]) {
+            posCam[0] = posCam[0] + (0.1 * vMovCam);
+        }
+        if (movCam[1]) {
+            posCam[0] = posCam[0] - (0.1 * vMovCam);
+        }
+
+        //*** Para camara: Movimiento Y
+        if (movCam[2]) {
+            posCam[1] = posCam[1] + (0.1 * vMovCam);
+        }
+        if (movCam[3]) {
+            posCam[1] = posCam[1] - (0.1 * vMovCam);
+        }
+
+        //*** Para camara: Movimiento Z
+        if (movCam[4]) {
+            posCam[2] = posCam[2] + (0.1 * vMovCam);
+        }
+        if (movCam[5]) {
+            posCam[2] = posCam[2] - (0.1*vMovCam);
+        }
+        glTranslatef(posCam[0], posCam[1], posCam[2]);
+    }
+
+	//*** Para Textura: aqui adiciono un método que abre la textura en JPG
+	void initialize_textures(void)
+	{
+		int w, h;
+		GLubyte* data = 0;
+		//data = glmReadPPM("soccer_ball_diffuse.ppm", &w, &h);
+		//std::cout << "Read soccer_ball_diffuse.ppm, width = " << w << ", height = " << h << std::endl;
+
+		//dib1 = loadImage("soccer_ball_diffuse.jpg"); //FreeImage
+
+		glGenTextures(1, &texid);
+		glBindTexture(GL_TEXTURE_2D, texid);
+		glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		// Loading JPG file
+		FIBITMAP* bitmap = FreeImage_Load(
+			FreeImage_GetFileType("./Mallas/bola/bola.jpg", 0),
+			"./Mallas/bola/bola.jpg");  //*** Para Textura: esta es la ruta en donde se encuentra la textura
+
+		FIBITMAP* pImage = FreeImage_ConvertTo32Bits(bitmap);
+		int nWidth = FreeImage_GetWidth(pImage);
+		int nHeight = FreeImage_GetHeight(pImage);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, nWidth, nHeight,
+			0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(pImage));
+
+		FreeImage_Unload(pImage);
+		//
+		glEnable(GL_TEXTURE_2D);
+	}
+
+
 	virtual void OnRender(void)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        double razon = 2, ang = 10;
-        int segmentos = 23;
 	
       //timer010 = 0.09; //for screenshot!
+
       glPushMatrix();
+	  //glRotatef(timer010 * 360, 0.5, 1.0f, 0.1f);
+
       if (shader) shader->begin();
+          moverCamara();
+          glPushMatrix();
 
-      glPushMatrix();
-        glTranslatef(0, -1, 3);
-        glRotatef(180,0,1,0);
-        glScalef(0.6, 0.6, 0.6);
-        objs[0]->draw();
-      glPopMatrix();
+              glPushMatrix();
+                  glTranslatef(0, -1, 3);
+                  glRotatef(180, 0, 1, 0);
+                  glScalef(0.6, 0.6, 0.6);
+                  objs[0]->draw();
+              glPopMatrix();
 
+              glPushMatrix();
+                  glTranslatef(1.5, -1.5, 3);
+                  glScalef(1, 1, 1);
+                  objs[1]->draw();
+              glPopMatrix();
 
-      glPushMatrix();
-      glTranslatef(1.5, -1.5, 3);
-      //glRotatef(180, 0, 1, 0);
-      glScalef(1, 1,1);
-      objs[1]->draw();
-      glPopMatrix();
+              glPushMatrix();
+                  glTranslatef(3, 5, -3);
+                  glScalef(7, 7, 7);
+                  objs[2]->draw();
+              glPopMatrix();
 
-      glPushMatrix();
-        glTranslatef(3, 5, -3);
-        glScalef(7, 7, 7);
-        objs[2]->draw();
-      glPopMatrix();
+              glPushMatrix();
+                  glTranslatef(0, 5, -3);
+                  glScalef(7, 7, 7);
+                  objs[3]->draw();
+              glPopMatrix();
 
-      glPushMatrix();
-          glTranslatef(-5, 0, -1);
-          objs[4]->draw();
-      glPopMatrix();
+              glPushMatrix();
+                  glTranslatef(-5, 0, -1);
+                  objs[4]->draw();
+              glPopMatrix();
 
-      glPushMatrix();
-      glTranslatef(0, 5, -3);
-      glScalef(7, 7, 7);
-      objs[3]->draw();
-      glPopMatrix();
-
+		  glPopMatrix();
 
       if (shader) shader->end();
+
+	  //*** Para Textura: llamado al shader para objetos texturizados
+	  if (shader1) shader1->begin();
+
+		  glPushMatrix();
+		      glTranslatef(1.5f, 0.0f, 0.0f);
+		      glBindTexture(GL_TEXTURE_2D, texid);
+		      glmDraw(objmodel_ptr1, GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
+		  glPopMatrix();
+	  if (shader1) shader1->end();
+
+
       glutSwapBuffers();
       glPopMatrix();
+
       UpdateTimer();
 
 		Repaint();
@@ -102,13 +192,6 @@ public:
 		glShadeModel(GL_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 
-        //***Abrir malla
-        objs[0] = new Model("./glm/models/astronaut/astronaut.obj");
-        objs[2] = new Model("./glm/models/rocket/rocket1.obj");
-        objs[3] = new Model("./glm/models/grua/grua.obj");
-        objs[4] = new Model("./glm/models/tree/tree.obj");
-        objs[1] = new Model("./glm/models/casco/casco.obj");
-
 		shader = SM.loadfromFile("vertexshader.txt","fragmentshader.txt"); // load (and compile, link) from file
 		if (shader==0) 
          std::cout << "Error Loading, compiling or linking shader\n";
@@ -117,12 +200,51 @@ public:
          ProgramObject = shader->GetProgramObject();
       }
 
+	 //*** Para Textura: abre los shaders para texturas
+		shader1 = SM.loadfromFile("vertexshaderT.txt", "fragmentshaderT.txt"); // load (and compile, link) from file
+		if (shader1 == 0)
+			std::cout << "Error Loading, compiling or linking shader\n";
+		else
+		{
+			ProgramObject = shader1->GetProgramObject();
+		}
+
       time0 = clock();
       timer010 = 0.0f;
       bUp = true;
 
+	  //Abrir mallas
+
+      objs[0] = new Model("./Mallas/astronaut/astronaut.obj");
+      objs[1] = new Model("./Mallas/casco/casco.obj");
+      objs[2] = new Model("./Mallas/rocket/rocket1.obj");
+      objs[3] = new Model("./Mallas/grua/grua.obj");
+      objs[4] = new Model("./Mallas/tree/tree.obj");
+
+	  //*** Para Textura: abrir malla de objeto a texturizar
+	  objmodel_ptr1 = NULL;
+
+	  if (!objmodel_ptr1)
+	  {
+		  objmodel_ptr1 = glmReadOBJ("./Mallas/bola/bola.obj");
+		  if (!objmodel_ptr1)
+			  exit(0);
+
+		  glmUnitize(objmodel_ptr1);
+		  glmFacetNormals(objmodel_ptr1);
+		  glmVertexNormals(objmodel_ptr1, 90.0);
+	  }
+ 
+	  //*** Para Textura: abrir archivo de textura
+	  initialize_textures();
       DemoLight();
 
+      //*** Para camara: posicionamiento-movimiento
+      vMovCam = 1.0;                        // Velocidad inicial de la camara
+      posCam[0] = posCam[1]= posCam[2] = 0; // Posicion inicial de la camara
+      movCam[0] = movCam[1] = false;        // Movimientos en X
+      movCam[2] = movCam[3] = false;        // Movimientos en Y
+      movCam[4] = movCam[5] = false;        // Movimientos en Z
 	}
 
 	virtual void OnResize(int w, int h)
@@ -138,7 +260,7 @@ public:
       gluPerspective(120,ratio,1,100);
 	   glMatrixMode(GL_MODELVIEW);
 	   glLoadIdentity();
-	   gluLookAt(1.0f,0.0f,4.0f, 
+	   gluLookAt(0.0f,0.0f,4.0f, 
 		          0.0,0.0,-1.0,
 			       0.0f,1.0f,0.0f);
    }
@@ -152,15 +274,49 @@ public:
 		if (cAscii == 27) // 0x1b = ESC
 		{
 			this->Close(); // Close Window!
-		} 
+		}
+
+        //*** Para camara:
+        // Movimiento en X
+        if (cAscii == 'a')
+            movCam[0] = true;
+        else if (cAscii == 'd')
+            movCam[1] = true;
+        // Movimiento en Y
+        if (cAscii == 'w')
+            movCam[3] = true;
+        else if (cAscii == 's')
+            movCam[2] = true;
+        // Movimiento en Z
+        if (cAscii == 'q')
+            movCam[4] = true;
+        else if (cAscii == 'e')
+            movCam[5] = true;
 	};
 
 	virtual void OnKeyUp(int nKey, char cAscii)
 	{
-      if (cAscii == 's')      // s: Shader
+      //*** Para camara:
+      // Movimiento en X
+      if (cAscii == 'a')
+          movCam[0] = false;
+      else if (cAscii == 'd')
+          movCam[1] = false;
+      // Movimiento en Y
+      if (cAscii == 'w')
+          movCam[3] = false;
+      else if (cAscii == 's')
+          movCam[2] = false;
+      // Movimiento en Z
+      if (cAscii == 'q')
+          movCam[4] = false;
+      else if (cAscii == 'e')
+          movCam[5] = false;
+
+      /*if (cAscii == 's')      // s: Shader
          shader->enable();
       else if (cAscii == 'f') // f: Fixed Function
-         shader->disable();
+         shader->disable();*/
 	}
 
    void UpdateTimer()
@@ -227,10 +383,10 @@ public:
      GLfloat light_Kd[]  = {1.0f, 0.1f, 0.1f, 1.0f};
      GLfloat light_Ks[]  = {1.0f, 1.0f, 1.0f, 1.0f};
 
-     glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+     /*glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
      glLightfv(GL_LIGHT0, GL_AMBIENT, light_Ka);
      glLightfv(GL_LIGHT0, GL_DIFFUSE, light_Kd);
-     glLightfv(GL_LIGHT0, GL_SPECULAR, light_Ks);
+     glLightfv(GL_LIGHT0, GL_SPECULAR, light_Ks);*/
 
      // -------------------------------------------
      // Material parameters:

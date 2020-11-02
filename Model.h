@@ -1,4 +1,4 @@
-#include "glm/glm.h"
+#include "glm.h"
 
 class Model {
 public:
