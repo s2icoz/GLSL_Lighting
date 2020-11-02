@@ -28,7 +28,7 @@ protected:
     float timer010;  // timer counting 0->1->0
     bool bUp;        // flag if counting up or down.
     GLMmodel* objmodel_ptr1; //*** Para Textura: variable para objeto texturizado
-    GLuint texid; //*** Para Textura: variable que almacena el identificador de textura
+    GLuint texid, texRocket; //*** Para Textura: variable que almacena el identificador de textura
 
     Model* player;      /*Puntero para referirse al modelo que actualmente se puede mover*/
     Model* objs[5];     /* Objetos en posiciones del arreglo
@@ -86,33 +86,25 @@ public:
 	//*** Para Textura: aqui adiciono un método que abre la textura en JPG
 	void initialize_textures(void)
 	{
-		int w, h;
-		GLubyte* data = 0;
-		//data = glmReadPPM("soccer_ball_diffuse.ppm", &w, &h);
-		//std::cout << "Read soccer_ball_diffuse.ppm, width = " << w << ", height = " << h << std::endl;
+        glGenTextures(1, &texRocket);
+        glBindTexture(GL_TEXTURE_2D, texRocket);
+        glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        // Cargando textura del cohete
+        FIBITMAP* bitmapRocket = FreeImage_Load(
+            FreeImage_GetFileType("./Mallas/rocket/rocket.jpg", 0),
+            "./Mallas/rocket/rocket.jpg");  //*** Para Textura: esta es la ruta en donde se encuentra la textura
+        FIBITMAP* pImageRocket = FreeImage_ConvertTo32Bits(bitmapRocket);
+        int nWidthRocket = FreeImage_GetWidth(pImageRocket);
+        int nHeightRocket = FreeImage_GetHeight(pImageRocket);
 
-		//dib1 = loadImage("soccer_ball_diffuse.jpg"); //FreeImage
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, nWidthRocket, nHeightRocket,
+            0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(pImageRocket));
 
-		glGenTextures(1, &texid);
-		glBindTexture(GL_TEXTURE_2D, texid);
-		glTexEnvi(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-		// Loading JPG file
-		FIBITMAP* bitmap = FreeImage_Load(
-			FreeImage_GetFileType("./Mallas/bola/bola.jpg", 0),
-			"./Mallas/bola/bola.jpg");  //*** Para Textura: esta es la ruta en donde se encuentra la textura
+        FreeImage_Unload(pImageRocket);
 
-		FIBITMAP* pImage = FreeImage_ConvertTo32Bits(bitmap);
-		int nWidth = FreeImage_GetWidth(pImage);
-		int nHeight = FreeImage_GetHeight(pImage);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, nWidth, nHeight,
-			0, GL_BGRA, GL_UNSIGNED_BYTE, (void*)FreeImage_GetBits(pImage));
-
-		FreeImage_Unload(pImage);
-		//
 		glEnable(GL_TEXTURE_2D);
 	}
 
@@ -136,7 +128,7 @@ public:
                   glTranslatef(0, -1, 3);
                   glRotatef(180, 0, 1, 0);
                   glScalef(0.6, 0.6, 0.6);
-                  objs[0]->draw();
+                  objs[0]->draw(GLM_SMOOTH | GLM_MATERIAL);
               glPopMatrix();
 
               glPushMatrix();
@@ -144,30 +136,30 @@ public:
 
                   glTranslatef(1.5, -1.5, 3);
                   glScalef(1, 1, 1);
-                  objs[1]->draw();
+                  objs[1]->draw(GLM_SMOOTH | GLM_MATERIAL);
               glPopMatrix();
 
-              glPushMatrix();
+              /*glPushMatrix();
                 objs[2]->move();
 
                   glTranslatef(3, 5, -3);
                   glScalef(7, 7, 7);
-                  objs[2]->draw();
-              glPopMatrix();
+                  objs[2]->draw(GLM_SMOOTH | GLM_MATERIAL);
+              glPopMatrix();*/
 
               glPushMatrix();
                 objs[3]->move();
 
                   glTranslatef(0, 5, -3);
                   glScalef(7, 7, 7);
-                  objs[3]->draw();
+                  objs[3]->draw(GLM_SMOOTH | GLM_MATERIAL);
               glPopMatrix();
 
               glPushMatrix();
                 objs[4]->move();
 
                   glTranslatef(-5, 0, -1);
-                  objs[4]->draw();
+                  objs[4]->draw(GLM_SMOOTH | GLM_MATERIAL);
               glPopMatrix();
 
 		  glPopMatrix();
@@ -177,11 +169,15 @@ public:
 	  //*** Para Textura: llamado al shader para objetos texturizados
 	  if (shader1) shader1->begin();
 
-		  glPushMatrix();
-		      glTranslatef(1.5f, 0.0f, 0.0f);
-		      glBindTexture(GL_TEXTURE_2D, texid);
-		      glmDraw(objmodel_ptr1, GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
-		  glPopMatrix();
+          glPushMatrix();
+              objs[2]->move();
+
+              glTranslatef(3, 5, -3);
+              glScalef(7, 7, 7);
+              glBindTexture(GL_TEXTURE_2D, texRocket);
+              objs[2]->draw(GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
+          glPopMatrix();
+
 	  if (shader1) shader1->end();
 
 
@@ -199,7 +195,7 @@ public:
 	// is already available!
 	virtual void OnInit()
 	{
-		glClearColor(0.5f, 0.5f, 1.0f, 0.0f);
+		glClearColor(0.1f, 0.5f, 0.5f, 0.0f);
 		glShadeModel(GL_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 
@@ -232,21 +228,8 @@ public:
       objs[3] = new Model("./Mallas/grua/grua.obj");
       objs[4] = new Model("./Mallas/tree/tree.obj");
 
-      player = objs[0];     //*** Para player: Se establece el modelo del astronauta como jugador inicial.
-
-	  //*** Para Textura: abrir malla de objeto a texturizar
-	  objmodel_ptr1 = NULL;
-
-	  if (!objmodel_ptr1)
-	  {
-		  objmodel_ptr1 = glmReadOBJ("./Mallas/bola/bola.obj");
-		  if (!objmodel_ptr1)
-			  exit(0);
-
-		  glmUnitize(objmodel_ptr1);
-		  glmFacetNormals(objmodel_ptr1);
-		  glmVertexNormals(objmodel_ptr1, 90.0);
-	  }
+      //*** Para player: Se establece el modelo del astronauta como jugador inicial.
+      player = objs[0];
  
 	  //*** Para Textura: abrir archivo de textura
 	  initialize_textures();

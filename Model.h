@@ -18,6 +18,6 @@ public:
     GLMmodel* ptr;
 	Model(char[23]);
 
-	void draw();
+	void draw(int);
     void move();
 };

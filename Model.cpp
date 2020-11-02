@@ -19,20 +19,20 @@ Model::Model(char path[23]) {
     this->mov[4] = this->mov[5] = false;
 }
 
-void Model::draw() {
+void Model::draw(int draw_params) {
     GLfloat material_Ka[] = { 0.5f, 0.0f, 0.0f, 1.0f };
     GLfloat material_Kd[] = { 0.4f, 0.4f, 0.5f, 1.0f };
     GLfloat material_Ks[] = { 0.8f, 0.8f, 0.0f, 1.0f };
     GLfloat material_Ke[] = { 0.1f, 0.0f, 0.0f, 0.0f };
     GLfloat material_Se = 20.0f;
 
-    /*glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material_Ka);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material_Ka);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material_Kd);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_Ks);
     glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, material_Ke);
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material_Se);*/
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material_Se);
 
-    glmDraw(this->ptr, GLM_SMOOTH | GLM_MATERIAL);
+    glmDraw(this->ptr, draw_params);
 }
 
 void Model::move() {
