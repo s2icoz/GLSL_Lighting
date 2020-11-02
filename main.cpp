@@ -30,6 +30,7 @@ protected:
     GLMmodel* objmodel_ptr1; //*** Para Textura: variable para objeto texturizado
     GLuint texid; //*** Para Textura: variable que almacena el identificador de textura
 
+    Model* player;      /*Puntero para referirse al modelo que actualmente se puede mover*/
     Model* objs[5];     /* Objetos en posiciones del arreglo
                         [0] = astronauta
                         [1] = casco
@@ -130,6 +131,8 @@ public:
           glPushMatrix();
 
               glPushMatrix();
+                objs[0]->move();
+                  
                   glTranslatef(0, -1, 3);
                   glRotatef(180, 0, 1, 0);
                   glScalef(0.6, 0.6, 0.6);
@@ -137,24 +140,32 @@ public:
               glPopMatrix();
 
               glPushMatrix();
+                objs[1]->move();
+
                   glTranslatef(1.5, -1.5, 3);
                   glScalef(1, 1, 1);
                   objs[1]->draw();
               glPopMatrix();
 
               glPushMatrix();
+                objs[2]->move();
+
                   glTranslatef(3, 5, -3);
                   glScalef(7, 7, 7);
                   objs[2]->draw();
               glPopMatrix();
 
               glPushMatrix();
+                objs[3]->move();
+
                   glTranslatef(0, 5, -3);
                   glScalef(7, 7, 7);
                   objs[3]->draw();
               glPopMatrix();
 
               glPushMatrix();
+                objs[4]->move();
+
                   glTranslatef(-5, 0, -1);
                   objs[4]->draw();
               glPopMatrix();
@@ -220,6 +231,8 @@ public:
       objs[2] = new Model("./Mallas/rocket/rocket1.obj");
       objs[3] = new Model("./Mallas/grua/grua.obj");
       objs[4] = new Model("./Mallas/tree/tree.obj");
+
+      player = objs[0];     //*** Para player: Se establece el modelo del astronauta como jugador inicial.
 
 	  //*** Para Textura: abrir malla de objeto a texturizar
 	  objmodel_ptr1 = NULL;
@@ -292,6 +305,23 @@ public:
             movCam[4] = true;
         else if (cAscii == 'e')
             movCam[5] = true;
+
+        //*** Para player:
+        // Movimiento en X
+        if (cAscii == 'j')
+            player->mov[0] = true;
+        else if (cAscii == 'l')
+            player->mov[1] = true;
+        // Movimiento en Y
+        if (cAscii == 'k')
+            player->mov[3] = true;
+        else if (cAscii == 'i')
+            player->mov[2] = true;
+        // Movimiento en Z
+        if (cAscii == 'u')
+            player->mov[4] = true;
+        else if (cAscii == 'o')
+            player->mov[5] = true;
 	};
 
 	virtual void OnKeyUp(int nKey, char cAscii)
@@ -312,6 +342,23 @@ public:
           movCam[4] = false;
       else if (cAscii == 'e')
           movCam[5] = false;
+
+      //*** Para player:
+      // Movimiento en X
+      if (cAscii == 'j')
+          player->mov[0] = false;
+      else if (cAscii == 'l')
+          player->mov[1] = false;
+      // Movimiento en Y
+      if (cAscii == 'k')
+          player->mov[3] = false;
+      else if (cAscii == 'i')
+          player->mov[2] = false;
+      // Movimiento en Z
+      if (cAscii == 'u')
+          player->mov[4] = false;
+      else if (cAscii == 'o')
+          player->mov[5] = false;
 
       /*if (cAscii == 's')      // s: Shader
          shader->enable();
